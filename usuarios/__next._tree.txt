@@ -1,2 +1,2 @@
 :HL["/Chamados-KML/_next/static/chunks/1xmsjsr_ki5qu.css","style"]
-0:{"tree":{"name":"","param":null,"prefetchHints":20,"slots":{"children":{"name":"usuarios","param":null,"prefetchHints":0,"slots":{"children":{"name":"__PAGE__","param":null,"prefetchHints":0,"slots":null}}}}},"staleTime":300,"buildId":"zhQKebZVWVgBdimjPmQ35"}
+0:{"tree":{"name":"","param":null,"prefetchHints":20,"slots":{"children":{"name":"usuarios","param":null,"prefetchHints":0,"slots":{"children":{"name":"__PAGE__","param":null,"prefetchHints":0,"slots":null}}}}},"staleTime":300,"buildId":"jN_mnrlgwEo2PguDla5Q1"}
