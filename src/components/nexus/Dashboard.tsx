@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import { CheckCircle2, Clock, Star, TrendingUp, Activity, Wifi, HardDrive, KeyRound, Bot, AlertTriangle } from "lucide-react";
 
 const HORAS = [
@@ -56,7 +57,11 @@ function KPI({ icon, label, value, sub, trend, accent }: {
 }
 
 export default function Dashboard() {
-  const today = new Date().toLocaleDateString("pt-BR", { weekday: "long", day: "2-digit", month: "long" });
+  const [today, setToday] = useState("");
+
+  useEffect(() => {
+    setToday(new Date().toLocaleDateString("pt-BR", { weekday: "long", day: "2-digit", month: "long" }));
+  }, []);
 
   return (
     <div className="space-y-6">
