@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useRef, useCallback, useEffect } from "react";
-import { Plus, Check, Trash2, Star, MoreVertical, ChevronDown, ChevronRight, Pencil, X, Lock, Users, Calendar, RefreshCw, ListTodo } from "lucide-react";
+import { Plus, Check, Trash2, Star, MoreVertical, ChevronDown, ChevronRight, Pencil, Lock, Users, Calendar, RefreshCw, ListTodo } from "lucide-react";
 import { podeApagarColunaEquipe } from "@/lib/auth-store";
 
 /* ─── tipos ─────────────────────────────────────────────────── */
@@ -118,15 +118,6 @@ function uid() { return `x${++_nextId}`; }
   Funciona para tarefas dentro de uma coluna E para colunas entre si.
 */
 type DragKind = "tarefa" | "coluna";
-
-interface DragState {
-  kind: DragKind;
-  listaId: string;   // de onde saiu (tarefas) ou id da coluna (colunas)
-  itemId: string;
-  ghost: HTMLElement;
-  startX: number;
-  startY: number;
-}
 
 /* ─── componente TarefaItem ─────────────────────────────────── */
 function TarefaItem({
@@ -282,7 +273,7 @@ const EMOJIS_OPCAO = ["☀","📅","📚","🗂","⚡","🎯","🔧","💡","�
 
 function Coluna({
   lista, onChange, onDelete, onColumnDragHandleDown, isDragging,
-  onDragHandleDown, draggingTarefa, modo, pasteIdx,
+  onDragHandleDown, draggingTarefa, modo,
 }: {
   lista: Lista;
   onChange: (l: Lista) => void;
@@ -292,7 +283,6 @@ function Coluna({
   onDragHandleDown: (e: React.PointerEvent, listaId: string, itemId: string) => void;
   draggingTarefa: { listaId: string; itemId: string } | null;
   modo?: "pessoal" | "equipe";
-  pasteIdx?: number;
 }) {
   const [mostrarForm,      setMostrarForm]      = useState(false);
   const [showMenu,         setShowMenu]         = useState(false);
@@ -948,7 +938,6 @@ function AbaPessoal() {
             onDragHandleDown={handleTarefaDragDown}
             draggingTarefa={draggingTarefa}
             modo="pessoal"
-            pasteIdx={listas.indexOf(lista)}
           />
         ))}
       </div>

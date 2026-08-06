@@ -10,14 +10,14 @@ const ThemeContext = createContext<{ theme: Theme; toggle: () => void }>({
 });
 
 export function ThemeProvider({ children }: { children: React.ReactNode }) {
-  const [theme, setTheme] = useState<Theme>("light");
+  const [theme, setTheme] = useState<Theme>(() => {
+    if (typeof window === "undefined") return "light";
+    return (localStorage.getItem("nexus-theme") as Theme | null) ?? "light";
+  });
 
   useEffect(() => {
-    const saved = localStorage.getItem("nexus-theme") as Theme | null;
-    const initial = saved ?? "light";
-    setTheme(initial);
-    document.documentElement.setAttribute("data-theme", initial);
-  }, []);
+    document.documentElement.setAttribute("data-theme", theme);
+  }, [theme]);
 
   function toggle() {
     setTheme((prev) => {

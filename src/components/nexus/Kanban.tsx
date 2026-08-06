@@ -5,7 +5,6 @@ import {
   Clock, Tag, ChevronUp, ChevronDown, ChevronsUpDown,
   Search, Filter, X, Plus, ChevronRight,
 } from "lucide-react";
-import { useGrupos } from "@/lib/grupos-store";
 import ChamadoDetalhe from "@/components/nexus/ChamadoDetalhe";
 
 type Prioridade = "Alta" | "Média" | "Baixa";
@@ -79,8 +78,6 @@ export default function Kanban() {
   const [statusFiltro, setStatusFiltro] = useState<Status | "">("");
   const [sortKey, setSortKey]       = useState<SortKey>("dataHora");
   const [sortDir, setSortDir]       = useState<SortDir>("desc");
-  const { getGrupoPorCategoria }    = useGrupos();
-
   function handleSort(key: SortKey) {
     if (sortKey === key) setSortDir((d) => (d === "asc" ? "desc" : "asc"));
     else { setSortKey(key); setSortDir("asc"); }
@@ -279,7 +276,7 @@ export default function Kanban() {
               {dados.length === 0 && (
                 <tr><td colSpan={8} className="text-center py-14" style={{ color: "var(--text-faint)" }}>Nenhum chamado encontrado.</td></tr>
               )}
-              {dados.map((c, i) => {
+              {dados.map((c) => {
                 return (
                   <tr
                     key={c.id}

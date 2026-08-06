@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import {
-  ShieldCheck, ShieldAlert, Lock, Eye, EyeOff,
+  ShieldCheck, ShieldAlert, Lock,
   LogIn, UserX, KeyRound, AlertTriangle, CheckCircle2,
   Clock, Monitor, Smartphone, Globe, X, RefreshCw,
 } from "lucide-react";

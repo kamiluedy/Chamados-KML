@@ -4,8 +4,8 @@ import { useState, useRef, useEffect } from "react";
 import { createPortal } from "react-dom";
 import {
   X, Send, Paperclip, Image as ImageIcon, CheckCircle2,
-  Clock, AlertTriangle, Lock, Calendar,
-  FileText, Download, ShieldCheck, Crown,
+  AlertTriangle, Lock, Calendar,
+  FileText, Download, ShieldCheck,
   ThumbsUp, CircleDot, UserPlus, UserMinus,
   ChevronDown, Tag, Users,
 } from "lucide-react";

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo, useRef, useEffect } from "react";
+import { useState, useRef, useEffect } from "react";
 import {
   Download, Search, Filter, ChevronUp, ChevronDown, X,
   ChevronsUpDown, CheckCircle2, AlertCircle, Clock,
@@ -123,23 +123,20 @@ export default function Relatorios() {
     else { setSortKey(key); setSortDir("asc"); }
   }
 
-  const dados = useMemo(() => {
-    let list = [...CHAMADOS];
-    if (busca)        list = list.filter((c) => `${c.id} ${c.titulo} ${c.solicitante} ${c.categoria} ${c.grupo}`.toLowerCase().includes(busca.toLowerCase()));
-    if (urgFiltro)    list = list.filter((c) => c.urgencia === urgFiltro);
-    if (statusFiltro) list = list.filter((c) => c.status === statusFiltro);
-    if (setorFiltro)  list = list.filter((c) => c.setor === setorFiltro);
-    if (grupoFiltro)  list = list.filter((c) => c.grupo === grupoFiltro);
-    if (catFiltro)    list = list.filter((c) => c.categoria === catFiltro);
-    list.sort((a, b) => {
-      const av = a[sortKey] ?? "";
-      const bv = b[sortKey] ?? "";
-      return sortDir === "asc"
-        ? String(av).localeCompare(String(bv))
-        : String(bv).localeCompare(String(av));
-    });
-    return list;
-  }, [busca, urgFiltro, statusFiltro, setorFiltro, grupoFiltro, catFiltro, sortKey, sortDir]);
+  let dados = [...CHAMADOS];
+  if (busca)        dados = dados.filter((c) => `${c.id} ${c.titulo} ${c.solicitante} ${c.categoria} ${c.grupo}`.toLowerCase().includes(busca.toLowerCase()));
+  if (urgFiltro)    dados = dados.filter((c) => c.urgencia === urgFiltro);
+  if (statusFiltro) dados = dados.filter((c) => c.status === statusFiltro);
+  if (setorFiltro)  dados = dados.filter((c) => c.setor === setorFiltro);
+  if (grupoFiltro)  dados = dados.filter((c) => c.grupo === grupoFiltro);
+  if (catFiltro)    dados = dados.filter((c) => c.categoria === catFiltro);
+  dados.sort((a, b) => {
+    const av = a[sortKey] ?? "";
+    const bv = b[sortKey] ?? "";
+    return sortDir === "asc"
+      ? String(av).localeCompare(String(bv))
+      : String(bv).localeCompare(String(av));
+  });
 
   function SortIcon({ col }: { col: SortKey }) {
     if (sortKey !== col) return <ChevronsUpDown size={12} style={{ color: "var(--text-faint)", opacity: 0.5 }} />;

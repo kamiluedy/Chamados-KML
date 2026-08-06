@@ -1,6 +1,5 @@
 "use client";
 
-import { useEffect, useState } from "react";
 import { CheckCircle2, Clock, Star, TrendingUp, Activity, Wifi, HardDrive, KeyRound, Bot, AlertTriangle } from "lucide-react";
 
 const HORAS = [
@@ -57,11 +56,7 @@ function KPI({ icon, label, value, sub, trend, accent }: {
 }
 
 export default function Dashboard() {
-  const [today, setToday] = useState("");
-
-  useEffect(() => {
-    setToday(new Date().toLocaleDateString("pt-BR", { weekday: "long", day: "2-digit", month: "long" }));
-  }, []);
+  const today = new Date().toLocaleDateString("pt-BR", { weekday: "long", day: "2-digit", month: "long" });
 
   return (
     <div className="space-y-6">
@@ -96,7 +91,7 @@ export default function Dashboard() {
           <div className="flex items-center justify-between mb-5">
             <div>
               <p className="font-bold text-sm" style={{ color: "var(--text-white)" }}>Volume de Chamados por Hora</p>
-              <p className="text-xs mt-0.5" style={{ color: "var(--text-faint)" }}>
+              <p className="text-xs mt-0.5" style={{ color: "var(--text-faint)" }} suppressHydrationWarning>
                 Hoje — {today}
               </p>
             </div>

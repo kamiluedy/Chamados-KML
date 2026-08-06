@@ -6,7 +6,7 @@ import {
   AlertTriangle, ChevronDown, Hash, Palette,
 } from "lucide-react";
 import { useGrupos, USUARIOS_INICIAIS, type Grupo, type UsuarioBase, type Subcategoria } from "@/lib/grupos-store";
-import { USUARIO_LOGADO, isAdmin, podeGerenciarGrupo } from "@/lib/auth-store";
+import { isAdmin, podeGerenciarGrupo } from "@/lib/auth-store";
 
 const CORES = [
   "#7c3aed", "#6d28d9", "#0ea5e9", "#0284c7",

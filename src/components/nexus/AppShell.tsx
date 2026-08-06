@@ -23,17 +23,12 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const { config } = useConfig();
 
-  const [collapsed, setCollapsed] = useState(true);
-  const [today, setToday] = useState("");
-
-  useEffect(() => {
-    setToday(new Date().toLocaleDateString("pt-BR", { weekday: "short", day: "2-digit", month: "short", year: "numeric" }));
-  }, []);
-
-  useEffect(() => {
+  const [collapsed, setCollapsed] = useState(() => {
+    if (typeof window === "undefined") return true;
     const saved = localStorage.getItem("nexus-sidebar");
-    if (saved !== null) setCollapsed(saved === "true");
-  }, []);
+    return saved !== null ? saved === "true" : true;
+  });
+  const today = new Date().toLocaleDateString("pt-BR", { weekday: "short", day: "2-digit", month: "short", year: "numeric" });
 
   useEffect(() => {
     localStorage.setItem("nexus-sidebar", String(collapsed));
@@ -77,7 +72,7 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
             <div className="flex items-center gap-4 text-[11px]" style={{ color: "var(--text-faint)" }}>
               <span>Turno: <span style={{ color: "var(--text-secondary)" }}>{config.turnoInicio}h – {config.turnoFim}h</span></span>
               <span>Analista: <span className="text-violet-500 font-semibold">{config.analistaNome}</span></span>
-              <span className="hidden md:inline">
+              <span className="hidden md:inline" suppressHydrationWarning>
                 {today}
               </span>
             </div>

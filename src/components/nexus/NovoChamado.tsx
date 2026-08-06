@@ -28,7 +28,7 @@ interface Form {
 const EMPTY: Form = { nome: "", setor: "", categoria: "", urgencia: "media", descricao: "" };
 
 export default function NovoChamado({ onSuccess }: { onSuccess?: () => void }) {
-  const { grupos, getGrupoPorCategoria } = useGrupos();
+  const { grupos } = useGrupos();
   const { config } = useConfig();
   const [form, setForm] = useState<Form>(EMPTY);
   const [estado, setEstado] = useState<Estado>("idle");
