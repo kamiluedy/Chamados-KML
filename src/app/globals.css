@@ -1,0 +1,398 @@
+﻿@import "tailwindcss";
+
+/* ══════════════════════════════════════════
+   KML DESK — Design System Tema Dual
+   ══════════════════════════════════════════ */
+
+/* ── TEMA CLARO — padrão ── */
+:root,
+[data-theme="light"] {
+  --bg-root:        #ede9fb;
+  --bg-surface:     rgba(255,255,255,0.80);
+  --bg-surface-2:   rgba(255,255,255,0.95);
+  --bg-header:      rgba(255,255,255,0.90);
+  --bg-statusbar:   rgba(237,233,251,0.95);
+  --bg-dropdown:    #ffffff;
+
+  --border-default: rgba(124,58,237,0.20);
+  --border-subtle:  rgba(124,58,237,0.10);
+  --border-muted:   rgba(0,0,0,0.07);
+
+  /* TODOS os textos devem ser escuros no light */
+  --text-primary:   #1e1b4b;
+  --text-secondary: #374151;
+  --text-muted:     #6b7280;
+  --text-faint:     #9ca3af;
+  --text-heading:   #3730a3;   /* substitui text-white nos headings */
+  --text-white:     #3730a3;
+
+  --scrollbar-track: #e5e7eb;
+  --scrollbar-thumb: #7c3aed;
+
+  --input-bg:       rgba(255,255,255,0.90);
+  --input-border:   rgba(124,58,237,0.28);
+  --input-option-bg:#ffffff;
+
+  --kanban-col-bg:            rgba(255,255,255,0.60);
+  --kanban-card-bg:           rgba(255,255,255,0.88);
+  --kanban-card-hover-border: rgba(124,58,237,0.55);
+  --kanban-card-hover-shadow: 0 0 18px rgba(124,58,237,0.15), 0 2px 8px rgba(0,0,0,0.06);
+
+  --table-header-bg: rgba(124,58,237,0.08);
+  --table-header-text: #6d28d9;
+
+  --kpi-value-color: #3f3d56;
+  --preview-bg: rgba(124,58,237,0.06);
+
+  --tab-color:  #6b7280;
+  --tab-active: #7c3aed;
+  --tab-hover:  #6d28d9;
+
+  --chart-grid:   rgba(0,0,0,0.07);
+  --avatar-border:#ffffff;
+
+  --orb-a:     rgba(167,139,250,0.30);
+  --orb-b:     rgba(56,189,248,0.18);
+  --orb-c:     rgba(196,181,253,0.14);
+  --dot-color: rgba(124,58,237,0.10);
+}
+
+/* ── TEMA ESCURO ── */
+[data-theme="dark"] {
+  --bg-root:        #050508;
+  --bg-surface:     rgba(255,255,255,0.035);
+  --bg-surface-2:   rgba(255,255,255,0.055);
+  --bg-header:      rgba(8,8,16,0.95);
+  --bg-statusbar:   rgba(10,10,18,0.95);
+  --bg-dropdown:    #13131f;
+
+  --border-default: rgba(124,58,237,0.20);
+  --border-subtle:  rgba(255,255,255,0.06);
+  --border-muted:   rgba(255,255,255,0.07);
+
+  --text-primary:   #e2e8f0;
+  --text-secondary: #a1a1aa;
+  --text-muted:     #71717a;
+  --text-faint:     #52525b;
+  --text-heading:   #ffffff;
+  --text-white:     #ffffff;
+
+  --scrollbar-track: #0d0d14;
+  --scrollbar-thumb: #7c3aed;
+
+  --input-bg:       rgba(255,255,255,0.04);
+  --input-border:   rgba(124,58,237,0.22);
+  --input-option-bg:#1a1a2e;
+
+  --kanban-col-bg:            rgba(255,255,255,0.02);
+  --kanban-card-bg:           rgba(255,255,255,0.03);
+  --kanban-card-hover-border: rgba(167,139,250,0.65);
+  --kanban-card-hover-shadow: 0 0 24px rgba(124,58,237,0.35), 0 0 4px rgba(167,139,250,0.4);
+
+  --table-header-bg: rgba(0,0,0,0.12);
+  --table-header-text: #c4b5fd;
+
+  --kpi-value-color: var(--text-heading);
+  --preview-bg: rgba(0,0,0,0.2);
+
+  --tab-color:  #71717a;
+  --tab-active: #a78bfa;
+  --tab-hover:  #c4b5fd;
+
+  --chart-grid:   rgba(255,255,255,0.055);
+  --avatar-border:#080810;
+
+  --orb-a:     rgba(109,40,217,0.28);
+  --orb-b:     rgba(56,189,248,0.10);
+  --orb-c:     rgba(124,58,237,0.12);
+  --dot-color: rgba(124,58,237,0.07);
+}
+
+/* ══════════════════════════════════════════
+   FUNDO ANIMADO — wrapper externo ao body
+   ══════════════════════════════════════════ */
+
+html {
+  height: 100%;
+}
+
+body {
+  background-color: var(--bg-root);
+  color: var(--text-primary);
+  transition: background-color 0.4s ease, color 0.3s ease;
+  min-height: 100%;
+  position: relative;
+  isolation: isolate; /* cria stacking context, pseudo-elems ficam atrás */
+}
+
+/* Orbs de gradiente flutuantes */
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  z-index: -2;
+  pointer-events: none;
+  animation: orb-drift 20s ease-in-out infinite alternate;
+}
+
+/* O data-theme fica no <html>, então os pseudo-elementos usam variáveis CSS */
+body::before {
+  background:
+    radial-gradient(ellipse 900px 650px at 10%  5%,  var(--orb-a) 0%, transparent 65%),
+    radial-gradient(ellipse 700px 550px at 92% 85%,  var(--orb-b) 0%, transparent 65%),
+    radial-gradient(ellipse 500px 400px at 55% 50%,  var(--orb-c) 0%, transparent 65%);
+}
+
+/* Grade de pontos */
+body::after {
+  content: '';
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  background-image: radial-gradient(circle, var(--dot-color) 1px, transparent 1px);
+  background-size: 26px 26px;
+}
+
+@keyframes orb-drift {
+  0%   { transform: translate(0,   0)   scale(1.00); }
+  30%  { transform: translate(35px,-25px) scale(1.05); }
+  65%  { transform: translate(-20px, 18px) scale(0.96); }
+  100% { transform: translate(12px,-12px) scale(1.03); }
+}
+
+/* ══════════════════════════════════════════
+   SCROLLBAR
+   ══════════════════════════════════════════ */
+::-webkit-scrollbar { width: 4px; height: 4px; }
+::-webkit-scrollbar-track { background: var(--scrollbar-track); }
+::-webkit-scrollbar-thumb { background: var(--scrollbar-thumb); border-radius: 4px; }
+
+/* ══════════════════════════════════════════
+   LOGO / TEXTO NEON
+   ══════════════════════════════════════════ */
+.neon-text {
+  background: linear-gradient(90deg, #a78bfa, #7c3aed, #c084fc);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* ══════════════════════════════════════════
+   GLASS
+   ══════════════════════════════════════════ */
+.glass {
+  background: var(--bg-surface);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  border: 1px solid var(--border-default);
+  transition: background 0.3s ease, border-color 0.3s ease;
+}
+
+/* ══════════════════════════════════════════
+   KANBAN CARDS
+   ══════════════════════════════════════════ */
+.kanban-card {
+  background: var(--kanban-card-bg);
+  border: 1px solid var(--border-muted);
+  border-radius: 10px;
+  transition: border-color 0.25s ease, box-shadow 0.25s ease,
+              transform 0.2s ease, background 0.3s ease;
+  cursor: pointer;
+}
+.kanban-card:hover {
+  border-color: var(--kanban-card-hover-border);
+  box-shadow: var(--kanban-card-hover-shadow);
+  transform: translateY(-2px);
+}
+
+/* ══════════════════════════════════════════
+   ANIMAÇÕES
+   ══════════════════════════════════════════ */
+@keyframes neon-pulse {
+  0%,100% { box-shadow: 0 0 4px  rgba(124,58,237,0.7); }
+  50%     { box-shadow: 0 0 12px rgba(124,58,237,1), 0 0 24px rgba(124,58,237,0.4); }
+}
+.pulse-neon { animation: neon-pulse 2s ease-in-out infinite; }
+
+@keyframes online-blink {
+  0%,100% { opacity: 1; }
+  50%     { opacity: 0.4; }
+}
+.online-dot { animation: online-blink 2.2s ease-in-out infinite; }
+
+/* ══════════════════════════════════════════
+   TABS
+   ══════════════════════════════════════════ */
+.nexus-tab {
+  position: relative;
+  font-size: 0.8125rem;
+  font-weight: 500;
+  letter-spacing: 0.03em;
+  color: var(--tab-color);
+  padding: 0.5rem 0;
+  white-space: nowrap;
+  transition: color 0.2s ease;
+}
+.nexus-tab::after {
+  content: '';
+  position: absolute;
+  bottom: 0; left: 0;
+  width: 0; height: 2px;
+  background: linear-gradient(90deg, #7c3aed, #a78bfa);
+  border-radius: 2px;
+  transition: width 0.3s ease;
+  box-shadow: 0 0 6px rgba(124,58,237,0.8);
+}
+.nexus-tab.active      { color: var(--tab-active); }
+.nexus-tab.active::after { width: 100%; }
+.nexus-tab:hover       { color: var(--tab-hover); }
+
+/* ══════════════════════════════════════════
+   BOTÃO NEON
+   ══════════════════════════════════════════ */
+.btn-neon {
+  background: linear-gradient(135deg, #7c3aed, #6d28d9);
+  color: #ffffff !important;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  border-radius: 8px;
+  border: 1px solid rgba(167,139,250,0.4);
+  transition: all 0.25s ease;
+  position: relative;
+  overflow: hidden;
+}
+.btn-neon::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(135deg, rgba(255,255,255,0.12), transparent);
+  pointer-events: none;
+}
+.btn-neon:hover {
+  box-shadow: 0 0 24px rgba(124,58,237,0.55), 0 4px 16px rgba(0,0,0,0.2);
+  transform: translateY(-1px);
+}
+.btn-neon:active { transform: translateY(0); }
+
+/* ══════════════════════════════════════════
+   GRÁFICO DE BARRAS
+   ══════════════════════════════════════════ */
+.bar-col {
+  background: linear-gradient(to top, #7c3aed, #a78bfa);
+  border-radius: 4px 4px 0 0;
+  transition: opacity 0.2s ease;
+  position: relative;
+  min-width: 0;
+}
+.bar-col:hover { opacity: 0.85; }
+.bar-col:hover::after {
+  content: attr(data-value);
+  position: absolute;
+  top: -22px; left: 50%;
+  transform: translateX(-50%);
+  font-size: 10px;
+  color: #a78bfa;
+  white-space: nowrap;
+  font-weight: 600;
+}
+
+/* ══════════════════════════════════════════
+   INPUTS
+   ══════════════════════════════════════════ */
+.nexus-input {
+  background: var(--input-bg);
+  border: 1px solid var(--input-border);
+  border-radius: 8px;
+  color: var(--text-primary);
+  transition: border-color 0.2s, box-shadow 0.2s, background 0.3s;
+  outline: none;
+  width: 100%;
+  padding: 0.625rem 0.875rem;
+  font-size: 0.875rem;
+}
+.nexus-input::placeholder { color: var(--text-faint); }
+.nexus-input:focus {
+  border-color: rgba(124,58,237,0.65);
+  box-shadow: 0 0 0 3px rgba(124,58,237,0.10);
+}
+.nexus-input option {
+  background: var(--input-option-bg);
+  color: var(--text-primary);
+}
+
+/* ══════════════════════════════════════════
+   COLUNAS KANBAN
+   ══════════════════════════════════════════ */
+.kanban-col {
+  background: var(--kanban-col-bg);
+  border: 1px solid var(--border-subtle);
+  border-radius: 12px;
+  backdrop-filter: blur(8px);
+  transition: background 0.3s ease;
+}
+
+/* ══════════════════════════════════════════
+   KPI CARDS
+   ══════════════════════════════════════════ */
+.kpi-card {
+  background: var(--bg-surface);
+  border: 1px solid var(--border-default);
+  border-radius: 12px;
+  backdrop-filter: blur(14px);
+  transition: border-color 0.25s, box-shadow 0.25s, background 0.3s;
+}
+.kpi-card:hover {
+  border-color: rgba(124,58,237,0.45);
+  box-shadow: 0 0 28px rgba(124,58,237,0.12);
+}
+
+/* ══════════════════════════════════════════
+   NAVBAR — sem scan line
+   ══════════════════════════════════════════ */
+.nexus-header {
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  /* SEM ::after — scan line removida */
+}
+
+/* ══════════════════════════════════════════
+   SIDEBAR ITEMS
+   ══════════════════════════════════════════ */
+.sidebar-item {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.5rem 0.875rem;
+  border-radius: 0.5rem;
+  transition: background 0.18s ease, color 0.18s ease, border-color 0.18s ease;
+  cursor: pointer;
+  font-size: 0.8125rem;
+  font-weight: 500;
+  white-space: nowrap;
+  overflow: hidden;
+  border-left: 2px solid transparent;
+}
+.sidebar-item:hover {
+  background: rgba(124, 58, 237, 0.07);
+}
+.sidebar-item.active {
+  background: rgba(124, 58, 237, 0.12);
+  border-left: 2px solid #7c3aed;
+  color: var(--tab-active);
+}
+
+/* ══════════════════════════════════════════
+   GRID DO GRÁFICO
+   ══════════════════════════════════════════ */
+.chart-grid-line {
+  border-top: 1px dashed var(--chart-grid);
+  position: relative;
+}
+.chart-grid-line::before {
+  content: attr(data-label);
+  position: absolute;
+  left: -36px; top: -8px;
+  font-size: 10px;
+  color: var(--text-faint);
+}
