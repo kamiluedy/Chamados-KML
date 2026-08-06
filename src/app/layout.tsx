@@ -4,6 +4,7 @@ import { ThemeProvider } from "@/context/ThemeContext";
 import AppShell from "@/components/nexus/AppShell";
 import { GruposProvider } from "@/lib/grupos-store";
 import { ConfigProvider } from "@/lib/config-store";
+import { ChamadosProvider } from "@/lib/chamados-store";
 
 export const metadata: Metadata = {
   title: "KML DESK — Sistema de Chamados de TI",
@@ -17,7 +18,9 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <ThemeProvider>
           <ConfigProvider>
             <GruposProvider>
-              <AppShell>{children}</AppShell>
+              <ChamadosProvider>
+                <AppShell>{children}</AppShell>
+              </ChamadosProvider>
             </GruposProvider>
           </ConfigProvider>
         </ThemeProvider>

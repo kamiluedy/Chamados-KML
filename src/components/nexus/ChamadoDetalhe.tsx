@@ -9,34 +9,7 @@ import {
   ThumbsUp, CircleDot, UserPlus, UserMinus,
   ChevronDown, Tag, Users,
 } from "lucide-react";
-
-/* ── Tipos ── */
-type Prioridade = "Crítica" | "Alta" | "Média" | "Baixa";
-type StatusChamado = "todo" | "doing" | "done" | "aguardando";
-
-interface Mensagem {
-  id: string;
-  autor: string;
-  avatar: string;
-  tipo: "tecnico" | "solicitante" | "sistema";
-  texto: string;
-  hora: string;
-  arquivo?: { nome: string; tipo: "pdf" | "img" | "outro" };
-}
-
-interface Chamado {
-  id: string;
-  titulo: string;
-  descricao: string;
-  prioridade: Prioridade;
-  categoria: string;
-  solicitante: string;
-  setor: string;
-  dataHora: string;
-  avatar: string;
-  status: StatusChamado;
-  grupoCategoria?: string;
-}
+import { useChamados, type Chamado, type Prioridade, type Status as StatusChamado, type Mensagem } from "@/lib/chamados-store";
 
 /* ── Helpers visuais ── */
 const PRIOR_STYLE: Record<Prioridade, string> = {
@@ -79,11 +52,11 @@ const PAPEL_COR: Record<Papel, { bg: string; text: string; border: string }> = {
 };
 
 /* ── Pool de técnicos disponíveis por grupo ── */
-interface Tecnico {
+interface TecnicoComPapel {
   id: string; nome: string; avatar: string; papel: Papel; setor: string;
 }
 
-const TODOS_TECNICOS: Tecnico[] = [
+const TODOS_TECNICOS: TecnicoComPapel[] = [
   { id: "t1", nome: "Kamila Luedy",    avatar: "KL", papel: "admin",    setor: "TI / Dados"       },
   { id: "t2", nome: "Marcos Vinicius", avatar: "MV", papel: "analista", setor: "Dados & BI"        },
   { id: "t3", nome: "Ana Cláudia",     avatar: "AC", papel: "tecnico",  setor: "Infraestrutura"    },
@@ -91,16 +64,6 @@ const TODOS_TECNICOS: Tecnico[] = [
   { id: "t5", nome: "Pedro Mota",      avatar: "PM", papel: "tecnico",  setor: "Infraestrutura"    },
   { id: "t6", nome: "Julio Andrade",   avatar: "JA", papel: "analista", setor: "TI / Dados"        },
 ];
-
-/* Atribuição automática por categoria */
-const ATRIBUICAO_AUTO: Record<string, string[]> = {
-  "Banco":     ["t1", "t2"],
-  "Rede":      ["t1", "t3", "t5"],
-  "Hardware":  ["t3", "t5"],
-  "Acesso":    ["t4", "t6"],
-  "Automação": ["t1", "t2", "t6"],
-  "Software":  ["t3", "t4"],
-};
 
 const GRUPOS_DISPONIVEIS = [
   "TI / Infraestrutura",
@@ -114,24 +77,16 @@ const CATEGORIAS_DISPONIVEIS = [
   "Banco", "Rede", "Hardware", "Acesso", "Automação", "Software",
 ];
 
-const MENSAGENS_INICIAIS: Mensagem[] = [
-  { id: "m1", autor: "Sistema",       avatar: "S",  tipo: "sistema",     texto: "Chamado aberto e atribuído ao grupo TI / Infraestrutura.",                             hora: "17/06 09:14" },
-  { id: "m2", autor: "Marcos Vinicius", avatar: "MV", tipo: "solicitante", texto: "Olá! O pipeline de ETL trava sempre na etapa de carga — tabela clientes. Timeout após 90 segundos. Aconteceu 3 vezes hoje de manhã.", hora: "17/06 09:16" },
-  { id: "m3", autor: "Kamila L.",     avatar: "KL", tipo: "tecnico",      texto: "Entendido, Marcos. Já estou verificando os logs do PostgreSQL. Você consegue me enviar o script que está sendo executado?",          hora: "17/06 09:20" },
-  { id: "m4", autor: "Marcos Vinicius", avatar: "MV", tipo: "solicitante", texto: "Claro, segue o arquivo.",                                                            hora: "17/06 09:22", arquivo: { nome: "etl_clientes.py", tipo: "pdf" } },
-  { id: "m5", autor: "Kamila L.",     avatar: "KL", tipo: "tecnico",      texto: "Encontrei o problema — o índice da tabela clientes estava corrompido após a migração de ontem. Vou reconstruir agora. Pode levar ~10 minutos.", hora: "17/06 09:35" },
-  { id: "m6", autor: "Sistema",       avatar: "S",  tipo: "sistema",      texto: "Status alterado para Em Progresso.",                                                   hora: "17/06 09:36" },
-];
+function papelDoTecnico(id: string): Papel {
+  const t = TODOS_TECNICOS.find((t) => t.id === id);
+  return t?.papel ?? "tecnico";
+}
 
 /* ── Componente principal ── */
 export default function ChamadoDetalhe({ chamado, onClose }: { chamado: Chamado; onClose: () => void }) {
-  const [mensagens, setMensagens]   = useState<Mensagem[]>(MENSAGENS_INICIAIS);
+  const { updateChamado } = useChamados();
   const [texto, setTexto]           = useState("");
-  const [prioridade, setPrioridade] = useState<Prioridade>(chamado.prioridade as Prioridade ?? "Alta");
-  const [status, setStatus]         = useState<StatusChamado>(chamado.status ?? "doing");
   const [previsao, setPrevisao]     = useState("2026-06-24");
-  const [pendente, setPendente]     = useState(false);
-  const [obsInternas, setObsInternas] = useState("Verificar se o índice foi reconstruído corretamente após a janela de manutenção.");
   const [aprovando, setAprovando]   = useState(false);
   const [aprovado, setAprovado]     = useState(false);
   const [modalAprovacao, setModalAprovacao] = useState(false);
@@ -142,17 +97,37 @@ export default function ChamadoDetalhe({ chamado, onClose }: { chamado: Chamado;
   const fileInputRef                        = useRef<HTMLInputElement>(null);
   const onCloseRef                          = useRef(onClose);
 
-  /* Técnicos atribuídos — pré-populado pela categoria */
-  const idsAutoAtribuidos = ATRIBUICAO_AUTO[chamado.categoria] ?? ["t1", "t3"];
-  const [tecAtribuidos, setTecAtribuidos] = useState<Tecnico[]>(
-    TODOS_TECNICOS.filter((t) => idsAutoAtribuidos.includes(t.id))
-  );
+  const mensagens   = chamado.mensagens;
+  const prioridade  = chamado.prioridade;
+  const status      = chamado.status;
+  const pendente    = chamado.pendente;
+  const obsInternas = chamado.obsInternas;
+
+  function setMensagens(updater: (prev: Mensagem[]) => Mensagem[]) {
+    updateChamado(chamado.id, { mensagens: updater(chamado.mensagens) });
+  }
+  function setPrioridade(p: Prioridade) { updateChamado(chamado.id, { prioridade: p }); }
+  function setStatus(s: StatusChamado) { updateChamado(chamado.id, { status: s }); }
+  function setPendente(v: boolean | ((prev: boolean) => boolean)) {
+    updateChamado(chamado.id, { pendente: typeof v === "function" ? v(chamado.pendente) : v });
+  }
+  function setObsInternas(v: string) { updateChamado(chamado.id, { obsInternas: v }); }
+
+  /* Técnicos atribuídos — vêm do store, exibidos com papel simulado */
   const [showAddTec, setShowAddTec] = useState(false);
   const addTecRef = useRef<HTMLDivElement>(null);
+  const tecAtribuidos: TecnicoComPapel[] = chamado.tecnicosAtribuidos.map((t) => ({ ...t, papel: papelDoTecnico(t.id) }));
+
+  function setTecAtribuidos(updater: (prev: TecnicoComPapel[]) => TecnicoComPapel[]) {
+    const next = updater(tecAtribuidos).map((t) => ({ id: t.id, nome: t.nome, avatar: t.avatar, setor: t.setor }));
+    updateChamado(chamado.id, { tecnicosAtribuidos: next });
+  }
 
   /* Categoria / grupo editáveis (Admin + Analista) */
-  const [categoriaEdit, setCategoriaEdit] = useState(chamado.categoria);
-  const [grupoEdit, setGrupoEdit]         = useState(chamado.grupoCategoria ?? "TI / Infraestrutura");
+  const [categoriaEdit, setCategoriaEditState] = useState(chamado.categoria);
+  const [grupoEdit, setGrupoEditState]         = useState(chamado.grupoCategoria ?? "TI / Infraestrutura");
+  function setCategoriaEdit(v: string) { setCategoriaEditState(v); updateChamado(chamado.id, { categoria: v }); }
+  function setGrupoEdit(v: string) { setGrupoEditState(v); updateChamado(chamado.id, { grupoCategoria: v }); }
 
   /* Fechar dropdowns ao clicar fora */
   useEffect(() => {
@@ -167,7 +142,7 @@ export default function ChamadoDetalhe({ chamado, onClose }: { chamado: Chamado;
   const podeManejarTecnicos = PAPEL_ATUAL === "admin" || PAPEL_ATUAL === "analista";
   const podeEditarCatGrupo  = PAPEL_ATUAL === "admin" || PAPEL_ATUAL === "analista";
 
-  function adicionarTecnico(tec: Tecnico) {
+  function adicionarTecnico(tec: TecnicoComPapel) {
     if (!tecAtribuidos.find((t) => t.id === tec.id)) {
       setTecAtribuidos((prev) => [...prev, tec]);
     }

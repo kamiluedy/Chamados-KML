@@ -6,12 +6,12 @@ import {
   ChevronsUpDown, CheckCircle2, AlertCircle, Clock,
   CircleDot, Circle, FileText, FileSpreadsheet, Braces,
 } from "lucide-react";
+import { useChamados, STATUS_LABEL_RELATORIO, type Prioridade as Urgencia } from "@/lib/chamados-store";
 
 /* ── Tipos ── */
-type Urgencia = "Crítica" | "Alta" | "Média" | "Baixa";
-type Status   = "Aberto" | "Em andamento" | "Resolvido" | "Fechado";
+type Status = "Aberto" | "Em andamento" | "Resolvido" | "Fechado";
 
-interface Chamado {
+interface ChamadoRelatorio {
   id: string;
   titulo: string;
   solicitante: string;
@@ -23,25 +23,6 @@ interface Chamado {
   abertura: string;
   tma: string | null;
 }
-
-/* ── Dados simulados ── */
-const CHAMADOS: Chamado[] = [
-  { id: "CHM-001", titulo: "VPN não conecta após atualização",          solicitante: "Fernanda Reis",   setor: "Financeiro",     categoria: "Rede / Conectividade",   grupo: "TI / Infraestrutura", urgencia: "Alta",    status: "Resolvido",    abertura: "2026-06-20 08:14", tma: "28 min"   },
-  { id: "CHM-002", titulo: "Monitor sem sinal após reinicialização",    solicitante: "Pedro Mota",      setor: "Comercial",      categoria: "Hardware / Periféricos", grupo: "TI / Infraestrutura", urgencia: "Média",   status: "Resolvido",    abertura: "2026-06-20 09:01", tma: "1h 14min" },
-  { id: "CHM-003", titulo: "Erro ao acessar sistema ERP",               solicitante: "Ana Cláudia",     setor: "Administrativo", categoria: "Acesso / Autenticação",  grupo: "Suporte / Acesso",    urgencia: "Crítica", status: "Resolvido",    abertura: "2026-06-20 09:33", tma: "14 min"   },
-  { id: "CHM-004", titulo: "Script de automação quebrando em produção", solicitante: "Marcos Vinicius", setor: "Dados & BI",     categoria: "Automação / Scripts",    grupo: "Dados & Automação",   urgencia: "Alta",    status: "Em andamento", abertura: "2026-06-20 10:22", tma: null       },
-  { id: "CHM-005", titulo: "Impressora do RH não imprime",              solicitante: "Kamila Luedy",    setor: "TI / Dados",     categoria: "Hardware / Periféricos", grupo: "TI / Infraestrutura", urgencia: "Baixa",   status: "Fechado",      abertura: "2026-06-19 14:05", tma: "1h 25min" },
-  { id: "CHM-006", titulo: "Acesso negado ao SharePoint",               solicitante: "Fernanda Reis",   setor: "Financeiro",     categoria: "Acesso / Autenticação",  grupo: "Suporte / Acesso",    urgencia: "Média",   status: "Resolvido",    abertura: "2026-06-19 11:00", tma: "22 min"   },
-  { id: "CHM-007", titulo: "Lentidão no banco de dados produção",       solicitante: "Marcos Vinicius", setor: "Dados & BI",     categoria: "Banco de Dados",         grupo: "Dados & Automação",   urgencia: "Crítica", status: "Resolvido",    abertura: "2026-06-18 16:45", tma: "17 min"   },
-  { id: "CHM-008", titulo: "Cabo de rede danificado — sala 3",          solicitante: "Ana Cláudia",     setor: "Administrativo", categoria: "Rede / Conectividade",   grupo: "TI / Infraestrutura", urgencia: "Baixa",   status: "Fechado",      abertura: "2026-06-18 09:10", tma: "1h 30min" },
-  { id: "CHM-009", titulo: "Windows Update forçando reinicialização",   solicitante: "Pedro Mota",      setor: "Comercial",      categoria: "Software / SO",          grupo: "TI / Infraestrutura", urgencia: "Média",   status: "Fechado",      abertura: "2026-06-17 13:30", tma: "35 min"   },
-  { id: "CHM-010", titulo: "Relatório Power BI sem dados",              solicitante: "Kamila Luedy",    setor: "TI / Dados",     categoria: "Banco de Dados",         grupo: "Dados & Automação",   urgencia: "Alta",    status: "Em andamento", abertura: "2026-06-22 07:55", tma: null       },
-  { id: "CHM-011", titulo: "Teclado com teclas presas",                 solicitante: "Ana Cláudia",     setor: "Administrativo", categoria: "Hardware / Periféricos", grupo: "TI / Infraestrutura", urgencia: "Baixa",   status: "Aberto",       abertura: "2026-06-22 08:30", tma: null       },
-  { id: "CHM-012", titulo: "E-mail corporativo não sincroniza",         solicitante: "Fernanda Reis",   setor: "Financeiro",     categoria: "Acesso / Autenticação",  grupo: "Suporte / Acesso",    urgencia: "Alta",    status: "Aberto",       abertura: "2026-06-22 09:12", tma: null       },
-  { id: "CHM-013", titulo: "Acesso externo via RDP bloqueado",          solicitante: "Marcos Vinicius", setor: "Dados & BI",     categoria: "Rede / Conectividade",   grupo: "TI / Infraestrutura", urgencia: "Alta",    status: "Em andamento", abertura: "2026-06-21 17:01", tma: null       },
-  { id: "CHM-014", titulo: "Script de ETL falhando às 02h",            solicitante: "Kamila Luedy",    setor: "TI / Dados",     categoria: "Automação / Scripts",    grupo: "Dados & Automação",   urgencia: "Crítica", status: "Resolvido",    abertura: "2026-06-21 02:05", tma: "14 min"   },
-  { id: "CHM-015", titulo: "Swap de notebook — HD por SSD",             solicitante: "Pedro Mota",      setor: "Comercial",      categoria: "Hardware / Periféricos", grupo: "TI / Infraestrutura", urgencia: "Baixa",   status: "Fechado",      abertura: "2026-06-16 10:00", tma: "2h 30min" },
-];
 
 /* ── Helpers visuais ── */
 const URGENCIA_STYLE: Record<Urgencia, string> = {
@@ -65,16 +46,30 @@ const STATUS_ICON: Record<Status, React.ReactNode> = {
   "Fechado":      <AlertCircle size={11} />,
 };
 
-type SortKey = keyof Chamado;
+type SortKey = keyof ChamadoRelatorio;
 type SortDir = "asc" | "desc";
 
 const TODAS_URGENCIAS: Urgencia[] = ["Crítica", "Alta", "Média", "Baixa"];
 const TODOS_STATUS: Status[]      = ["Aberto", "Em andamento", "Resolvido", "Fechado"];
-const TODOS_SETORES    = [...new Set(CHAMADOS.map((c) => c.setor))].sort();
-const TODOS_GRUPOS     = [...new Set(CHAMADOS.map((c) => c.grupo))].sort();
-const TODAS_CATEGORIAS = [...new Set(CHAMADOS.map((c) => c.categoria))].sort();
 
 export default function Relatorios() {
+  const { chamados } = useChamados();
+  const CHAMADOS: ChamadoRelatorio[] = chamados.map((c) => ({
+    id: c.id,
+    titulo: c.titulo,
+    solicitante: c.solicitante,
+    setor: c.setor,
+    categoria: c.categoria,
+    grupo: c.grupoCategoria,
+    urgencia: c.prioridade,
+    status: STATUS_LABEL_RELATORIO[c.status] as Status,
+    abertura: c.dataHora,
+    tma: null,
+  }));
+  const TODOS_SETORES    = [...new Set(CHAMADOS.map((c) => c.setor))].sort();
+  const TODOS_GRUPOS     = [...new Set(CHAMADOS.map((c) => c.grupo))].sort();
+  const TODAS_CATEGORIAS = [...new Set(CHAMADOS.map((c) => c.categoria))].sort();
+
   const [busca, setBusca]               = useState("");
   const [urgFiltro, setUrgFiltro]       = useState<Urgencia | "">("");
   const [statusFiltro, setStatusFiltro] = useState<Status | "">("");

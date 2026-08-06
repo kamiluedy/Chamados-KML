@@ -30,7 +30,6 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
     setToday(new Date().toLocaleDateString("pt-BR", { weekday: "short", day: "2-digit", month: "short", year: "numeric" }));
     const saved = localStorage.getItem("nexus-sidebar");
     if (saved !== null) setCollapsed(saved === "true");
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   useEffect(() => {

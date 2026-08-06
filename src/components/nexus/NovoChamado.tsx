@@ -7,6 +7,7 @@ import {
 } from "lucide-react";
 import { useGrupos } from "@/lib/grupos-store";
 import { useConfig, slaLabel } from "@/lib/config-store";
+import { useChamados, type Prioridade } from "@/lib/chamados-store";
 
 const URGENCIAS = [
   { value: "baixa",   label: "Baixa — não urgente",               color: "text-emerald-500" },
@@ -27,9 +28,17 @@ interface Form {
 
 const EMPTY: Form = { nome: "", setor: "", categoria: "", urgencia: "media", descricao: "" };
 
+const URGENCIA_PRIORIDADE: Record<string, Prioridade> = {
+  baixa: "Baixa",
+  media: "Média",
+  alta: "Alta",
+  critica: "Crítica",
+};
+
 export default function NovoChamado({ onSuccess }: { onSuccess?: () => void }) {
-  const { grupos } = useGrupos();
+  const { grupos, getGrupoPorCategoria } = useGrupos();
   const { config } = useConfig();
+  const { addChamado } = useChamados();
   const [form, setForm] = useState<Form>(EMPTY);
   const [estado, setEstado] = useState<Estado>("idle");
   const [protocolo, setProtocolo] = useState("");
@@ -60,8 +69,17 @@ export default function NovoChamado({ onSuccess }: { onSuccess?: () => void }) {
     if (err) { alert(err); return; }
     setEstado("loading");
     await new Promise((r) => setTimeout(r, 1800));
-    const proto = `#${String(Math.floor(Math.random() * 900) + 100).padStart(4, "0")}`;
-    setProtocolo(proto);
+    const grupo = getGrupoPorCategoria(form.categoria);
+    const novo = addChamado({
+      titulo: `${form.categoria} — ${form.descricao.slice(0, 40)}${form.descricao.length > 40 ? "…" : ""}`,
+      descricao: form.descricao.trim(),
+      prioridade: URGENCIA_PRIORIDADE[form.urgencia] ?? "Média",
+      categoria: form.categoria,
+      grupoCategoria: grupo?.nome ?? "TI / Infraestrutura",
+      solicitante: form.nome.trim(),
+      setor: form.setor.trim(),
+    });
+    setProtocolo(novo.id);
     setEstado("success");
   }
 

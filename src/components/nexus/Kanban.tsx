@@ -1,30 +1,16 @@
 "use client";
 
 import { useState, useMemo } from "react";
+import Link from "next/link";
 import {
   Clock, Tag, ChevronUp, ChevronDown, ChevronsUpDown,
   Search, Filter, X, Plus, ChevronRight,
 } from "lucide-react";
 import ChamadoDetalhe from "@/components/nexus/ChamadoDetalhe";
-
-type Prioridade = "Alta" | "Média" | "Baixa";
-type Status = "todo" | "doing" | "done";
-
-interface Chamado {
-  id: string;
-  titulo: string;
-  descricao: string;
-  prioridade: Prioridade;
-  categoria: string;
-  solicitante: string;
-  setor: string;
-  dataHora: string;
-  avatar: string;
-  grupoCategoria?: string;
-  status: Status;
-}
+import { useChamados, STATUS_LABEL, type Prioridade, type Status } from "@/lib/chamados-store";
 
 const PRIOR_STYLE: Record<Prioridade, string> = {
+  "Crítica": "bg-rose-500/15 text-rose-400 border-rose-500/30",
   Alta:  "bg-red-500/15 text-red-400 border-red-500/30",
   Média: "bg-yellow-500/15 text-yellow-400 border-yellow-500/30",
   Baixa: "bg-emerald-500/15 text-emerald-400 border-emerald-500/30",
@@ -33,13 +19,8 @@ const PRIOR_STYLE: Record<Prioridade, string> = {
 const STATUS_STYLE: Record<Status, string> = {
   todo:  "bg-zinc-500/15 text-zinc-400 border-zinc-500/30",
   doing: "bg-blue-500/15 text-blue-400 border-blue-500/30",
+  aguardando: "bg-yellow-500/15 text-yellow-400 border-yellow-500/30",
   done:  "bg-emerald-500/15 text-emerald-400 border-emerald-500/30",
-};
-
-const STATUS_LABEL: Record<Status, string> = {
-  todo:  "A Fazer",
-  doing: "Em Progresso",
-  done:  "Concluído",
 };
 
 const CAT_STYLE: Record<string, string> = {
@@ -51,27 +32,14 @@ const CAT_STYLE: Record<string, string> = {
   "Software":  "bg-teal-500/15 text-teal-400",
 };
 
-const CHAMADOS_INICIAL: Chamado[] = [
-  { id: "#0051", titulo: "Erro na carga de dados PostgreSQL",         descricao: "Pipeline de ETL travando na etapa de carga — tabela clientes. Timeout após 90s.",                prioridade: "Alta",  categoria: "Banco",     solicitante: "Marcos Vinicius",      setor: "Dados & BI",       dataHora: "17/06 — 09:14", avatar: "MV", grupoCategoria: "Banco de Dados / PostgreSQL",    status: "todo"  },
-  { id: "#0050", titulo: "Sem acesso ao sistema Protheus",            descricao: "Usuário não consegue logar no ERP desde a última atualização do AD.",                             prioridade: "Alta",  categoria: "Acesso",    solicitante: "Fernanda Reis",        setor: "Financeiro",       dataHora: "17/06 — 09:02", avatar: "FR", grupoCategoria: "Acesso / Autenticação",          status: "todo"  },
-  { id: "#0049", titulo: "Monitor externo não detectado",             descricao: "TV Samsung 55pol via HDMI não é reconhecida pelo notebook Dell.",                                 prioridade: "Baixa", categoria: "Hardware",  solicitante: "Julio Andrade",        setor: "Comercial",        dataHora: "17/06 — 08:47", avatar: "JA", grupoCategoria: "Hardware / Periféricos",          status: "todo"  },
-  { id: "#0048", titulo: "Instabilidade no bot Python/Selenium",      descricao: "Bot de automação de relatórios falhando silenciosamente às 07h. ChromeDriver desatualizado.",     prioridade: "Alta",  categoria: "Automação", solicitante: "Kamila Luedy",         setor: "TI / Dados",       dataHora: "17/06 — 08:30", avatar: "KL", grupoCategoria: "Automação / Scripts / Bots",     status: "doing" },
-  { id: "#0047", titulo: "Configuração de acesso Moodle",             descricao: "Novo colaborador sem perfil de tutor no ambiente de EAD corporativo.",                            prioridade: "Média", categoria: "Acesso",    solicitante: "Kamila Luedy",         setor: "TI / RH",          dataHora: "17/06 — 08:05", avatar: "KL", grupoCategoria: "Acesso / Moodle",                status: "doing" },
-  { id: "#0046", titulo: "Queda na rede — switch Piso 3",             descricao: "14 estações sem conexão após queda de energia. Switch HP 1910 não restabeleceu.",                 prioridade: "Alta",  categoria: "Rede",      solicitante: "Coord. Infraestrutura", setor: "Infraestrutura",  dataHora: "17/06 — 07:58", avatar: "CI", grupoCategoria: "Rede / Conectividade",           status: "doing" },
-  { id: "#0045", titulo: "Impressora HP LaserJet — fila travada",     descricao: "Spool corrompido após atualização Windows. Limpeza e reinício do serviço.",                       prioridade: "Baixa", categoria: "Hardware",  solicitante: "Ana Cláudia",          setor: "Administrativo",   dataHora: "17/06 — 07:30", avatar: "AC", grupoCategoria: "Hardware / Periféricos",          status: "done"  },
-  { id: "#0044", titulo: "Redefinição de senha — VPN corporativa",    descricao: "Usuário bloqueado após 5 tentativas incorretas. Reset e orientação concluídos.",                   prioridade: "Média", categoria: "Acesso",    solicitante: "Pedro Mota",           setor: "Comercial",        dataHora: "16/06 — 17:45", avatar: "PM", grupoCategoria: "Acesso / Autenticação",          status: "done"  },
-  { id: "#0043", titulo: "Notebook reiniciando aleatoriamente",       descricao: "Diagnóstico: superaquecimento. Limpeza interna e substituição da pasta térmica.",                  prioridade: "Média", categoria: "Hardware",  solicitante: "Bruna Alves",          setor: "Marketing",        dataHora: "16/06 — 16:20", avatar: "BA", grupoCategoria: "Hardware / Periféricos",          status: "done"  },
-  { id: "#0042", titulo: "Script n8n quebrando na integração Sheets", descricao: "Token OAuth expirado. Reautenticação e teste de fluxo concluídos com sucesso.",                   prioridade: "Alta",  categoria: "Automação", solicitante: "Kamila Luedy",         setor: "TI / Dados",       dataHora: "16/06 — 14:10", avatar: "KL", grupoCategoria: "Automação / Scripts / Bots",     status: "done"  },
-];
-
 type SortKey = "id" | "titulo" | "prioridade" | "status" | "solicitante" | "dataHora";
 type SortDir = "asc" | "desc";
 
-const PRIORIDADES: Prioridade[] = ["Alta", "Média", "Baixa"];
-const STATUSES: Status[]        = ["todo", "doing", "done"];
+const PRIORIDADES: Prioridade[] = ["Crítica", "Alta", "Média", "Baixa"];
+const STATUSES: Status[]        = ["todo", "doing", "aguardando", "done"];
 
 export default function Kanban() {
-  const [chamados, setChamados]     = useState(CHAMADOS_INICIAL);
+  const { chamados, updateChamado } = useChamados();
   const [busca, setBusca]           = useState("");
   const [filtroAberto, setFiltroAberto] = useState(false);
   const [priorFiltro, setPriorFiltro]   = useState<Prioridade | "">("");
@@ -85,13 +53,12 @@ export default function Kanban() {
 
   function moverStatus(id: string, dir: "prev" | "next") {
     const ORDER: Status[] = ["todo", "doing", "done"];
-    setChamados((prev) => prev.map((c) => {
-      if (c.id !== id) return c;
-      const idx = ORDER.indexOf(c.status);
-      const novoIdx = dir === "next" ? idx + 1 : idx - 1;
-      if (novoIdx < 0 || novoIdx >= ORDER.length) return c;
-      return { ...c, status: ORDER[novoIdx] };
-    }));
+    const atual = chamados.find((c) => c.id === id);
+    if (!atual) return;
+    const idx = ORDER.indexOf(atual.status === "aguardando" ? "doing" : atual.status);
+    const novoIdx = dir === "next" ? idx + 1 : idx - 1;
+    if (novoIdx < 0 || novoIdx >= ORDER.length) return;
+    updateChamado(id, { status: ORDER[novoIdx] });
   }
 
   const dados = useMemo(() => {
@@ -117,12 +84,13 @@ export default function Kanban() {
   }
 
   const temFiltro = !!(busca || priorFiltro || statusFiltro);
-  const [chamadoAberto, setChamadoAberto] = useState<Chamado | null>(null);
+  const [chamadoAbertoId, setChamadoAbertoId] = useState<string | null>(null);
+  const chamadoAberto = chamadoAbertoId ? chamados.find((c) => c.id === chamadoAbertoId) ?? null : null;
 
   return (
     <div className="space-y-5">
       {chamadoAberto && (
-        <ChamadoDetalhe chamado={chamadoAberto} onClose={() => setChamadoAberto(null)} />
+        <ChamadoDetalhe chamado={chamadoAberto} onClose={() => setChamadoAbertoId(null)} />
       )}
 
       {/* Cabeçalho */}
@@ -133,9 +101,9 @@ export default function Kanban() {
             <span className="font-semibold" style={{ color: "var(--text-heading)" }}>{chamados.length}</span> chamados ativos · Atualizado agora
           </p>
         </div>
-        <button className="flex items-center gap-1.5 btn-neon text-xs px-4 py-2">
+        <Link href="/novo" className="flex items-center gap-1.5 btn-neon text-xs px-4 py-2">
           <Plus size={13} /> Novo Chamado
-        </button>
+        </Link>
       </div>
 
       {/* Barra de busca + filtros */}
@@ -284,7 +252,7 @@ export default function Kanban() {
                       className="transition-colors"
                       onMouseEnter={(e) => (e.currentTarget.style.background = "rgba(124,58,237,0.04)")}
                       onMouseLeave={(e) => (e.currentTarget.style.background = "transparent")}
-                      onClick={() => setChamadoAberto(c)}
+                      onClick={() => setChamadoAbertoId(c.id)}
                     >
                       <td className="px-4 py-3 whitespace-nowrap">
                         <span className="font-mono font-semibold" style={{ color: "#a78bfa" }}>{c.id}</span>
