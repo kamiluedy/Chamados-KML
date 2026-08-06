@@ -1,6 +1,6 @@
 "use client";
 
-import { createContext, useContext, useState, ReactNode } from "react";
+import { createContext, useContext, useEffect, useState, ReactNode } from "react";
 
 export interface SlaConfig {
   critica: number;
@@ -42,15 +42,14 @@ interface Ctx {
 const ConfigCtx = createContext<Ctx | null>(null);
 
 export function ConfigProvider({ children }: { children: ReactNode }) {
-  const [config, setConfig] = useState<ConfigStore>(() => {
-    if (typeof window === "undefined") return DEFAULTS;
+  const [config, setConfig] = useState<ConfigStore>(DEFAULTS);
+
+  useEffect(() => {
     try {
       const raw = localStorage.getItem(KEY);
-      return raw ? { ...DEFAULTS, ...JSON.parse(raw) } : DEFAULTS;
-    } catch {
-      return DEFAULTS;
-    }
-  });
+      if (raw) setConfig({ ...DEFAULTS, ...JSON.parse(raw) });
+    } catch { /* ignore */ }
+  }, []);
 
   function save(patch: Partial<ConfigStore>) {
     setConfig((prev) => {

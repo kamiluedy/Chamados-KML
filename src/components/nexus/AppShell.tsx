@@ -23,12 +23,15 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const { config } = useConfig();
 
-  const [collapsed, setCollapsed] = useState(() => {
-    if (typeof window === "undefined") return true;
+  const [collapsed, setCollapsed] = useState(true);
+  const [today, setToday] = useState("");
+
+  useEffect(() => {
+    setToday(new Date().toLocaleDateString("pt-BR", { weekday: "short", day: "2-digit", month: "short", year: "numeric" }));
     const saved = localStorage.getItem("nexus-sidebar");
-    return saved !== null ? saved === "true" : true;
-  });
-  const today = new Date().toLocaleDateString("pt-BR", { weekday: "short", day: "2-digit", month: "short", year: "numeric" });
+    if (saved !== null) setCollapsed(saved === "true");
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   useEffect(() => {
     localStorage.setItem("nexus-sidebar", String(collapsed));
