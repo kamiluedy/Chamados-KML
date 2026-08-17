@@ -167,7 +167,6 @@ function NavLink({ href, icon, label, isActive, collapsed }: {
   return (
     <Link
       href={href}
-      prefetch={true}
       title={collapsed ? label : undefined}
       className={`sidebar-item w-full${isActive ? " active" : ""}`}
       style={{
