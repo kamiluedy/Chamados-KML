@@ -109,6 +109,19 @@ const DEFAULTS: Chamado[] = ([
 
 const KEY = "nexus-chamados";
 
+function isChamadoValido(c: unknown): c is Chamado {
+  if (typeof c !== "object" || c === null) return false;
+  const o = c as Record<string, unknown>;
+  return (
+    typeof o.id === "string" &&
+    typeof o.titulo === "string" &&
+    Array.isArray(o.tecnicosAtribuidos) &&
+    Array.isArray(o.mensagens) &&
+    typeof o.obsInternas === "string" &&
+    typeof o.pendente === "boolean"
+  );
+}
+
 function gerarId(existentes: Chamado[]): string {
   const nums = existentes
     .map((c) => parseInt(c.id.replace("#", ""), 10))
@@ -147,7 +160,13 @@ export function ChamadosProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     try {
       const raw = localStorage.getItem(KEY);
-      if (raw) setChamados(JSON.parse(raw));
+      if (!raw) return;
+      const parsed = JSON.parse(raw);
+      if (Array.isArray(parsed) && parsed.every(isChamadoValido)) {
+        setChamados(parsed);
+      } else {
+        localStorage.removeItem(KEY);
+      }
     } catch { /* ignore */ }
   }, []);
 
